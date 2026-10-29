@@ -49,7 +49,8 @@ cd engine
 uv sync                     # install deps
 uv run pytest               # tests
 uv run ruff check . && uv run ruff format --check .
-uv run mypy src
+uv run mypy                 # strict; checks src/ and tests/ (configured in pyproject)
+uv run pytest -m slow       # tests that load the real model
 ```
 
 ## Skills and plugins (use them; don't ignore them)
