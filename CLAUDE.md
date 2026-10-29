@@ -30,6 +30,7 @@ CodeSense is a local-first VS Code extension for semantic code search. It is a l
 | Exclusions | `pathspec` (.gitignore semantics) |
 | Python tooling | uv, Python 3.12, ruff, mypy (strict), pytest |
 | Extension tooling | `yo code`, esbuild, ESLint, `@vscode/test-cli`, `@vscode/vsce` |
+| Development environment | VS Code with Python and TypeScript extensions |
 
 **Known pin:** `transformers>=4.44,<4.50`. Jina's remote model code imports `find_pruneable_heads_and_indices`, which was removed in later versions. Do not upgrade it without re-running the model smoke test.
 
