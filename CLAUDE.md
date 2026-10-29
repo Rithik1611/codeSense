@@ -17,6 +17,8 @@ CodeSense is a local-first VS Code extension for semantic code search. It is a l
 
 **Current level: Level 1, single-repo semantic search.** Do not build anything from Levels 2–5 yet.
 
+**Progress and the next step live in `docs/agenda/level-1.md`.** Read it at the start of every session, and update its status table when a step completes. Design overview: `docs/architecture.md`. Decisions: `docs/decisions/`.
+
 ## Fixed stack decisions (approved — do not re-litigate)
 
 | Layer | Choice |
