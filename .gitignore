@@ -1,0 +1,30 @@
+# Third-party bootcamp material (local only, not ours to publish)
+AI_Engineer_Bootcamp_Master_Prompt.md
+How_to_Use_the_AI_Engineer_Bootcamp.md
+scopeOfImplementation.txt
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / VS Code extension
+node_modules/
+out/
+dist/
+*.vsix
+.vscode-test/
+
+# CodeSense local index data
+*.db
+*.db-journal
+
+# graphify output
+graphify-out/
+
+# OS
+.DS_Store
+Thumbs.db

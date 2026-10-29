@@ -1,0 +1,33 @@
+[project]
+name = "codesense"
+version = "0.1.0"
+description = "Local semantic code search engine for the CodeSense VS Code extension"
+readme = "README.md"
+authors = [
+    { name = "RITHIK V" }
+]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pathspec>=1.1.1",
+    # jina-embeddings-v2-base-code ships custom model code (trust_remote_code)
+    # that imports helpers removed in transformers 4.50+/5.x. Pin until we
+    # switch models or Jina updates their code.
+    "sentence-transformers>=3.4,<6",
+    "transformers>=4.44,<4.50",
+    "sqlite-vec>=0.1.9",
+    "torch>=2.15.0",
+    "tree-sitter>=0.26.0",
+    "tree-sitter-javascript>=0.25.0",
+    "tree-sitter-typescript>=0.23.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.3",
+]
