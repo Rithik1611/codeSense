@@ -51,7 +51,7 @@ flowchart TB
 workspace files
   → ingest/      discover(): prune exclusions + .gitignore, list supported files (names only)
                  read_source(): per file; skip oversized/binary/non-UTF-8 with a recorded reason
-  → chunking/    tree-sitter → functions, classes, methods (window fallback)
+  → chunking/    tree-sitter → functions, class headers, methods; uncovered code → line windows
   → indexer      compare content hashes with the store; keep only new or changed chunks
   → embedding/   batch-embed new chunks → 768-dim L2-normalized vectors
   → store/       write chunk metadata + vectors in one transaction per file
@@ -76,7 +76,7 @@ query text
 | `errors.py`, `log.py` | `CodeSenseError` / `ConfigError`; stderr-only logging via `CODESENSE_LOG_LEVEL` | ✅ Step 2.3 |
 | `config.py` | `IndexConfig`: exclusions, size/file/token limits, window chunking; `from_dict` validates untrusted settings | ✅ Step 2.4 |
 | `ingest/` | `languages.py` (extension → language), `discovery.py` (walk, exclusions, `.gitignore`, file cap), `filters.py` (size, binary, UTF-8 checks per file); skips recorded as `SkippedFile` with a `SkipReason` | ✅ Step 3 |
-| `chunking/` | tree-sitter extraction, fixed-window fallback | 📋 Step 4 |
+| `chunking/` | `symbols.py` (tree-sitter: functions, class header + methods, doc comments), `window.py` (overlapping line windows), `chunker.py` (symbols + gap windows → `CodeChunk`) | ✅ Step 4 |
 | `embedding/` | `Embedder` interface, `JinaEmbedder`, `FakeEmbedder` (tests) | 📋 Step 5 |
 | `store/` | `VectorStore` interface, SQLite + sqlite-vec implementation | 📋 Step 6 |
 | `indexer.py` | Pipeline orchestration, embedding reuse, cancellation | 📋 Step 7 |
@@ -97,6 +97,8 @@ Only **two** interfaces exist on purpose: `Embedder` and `VectorStore`. The spec
 `jinaai/jina-embeddings-v2-base-code`: 768 dimensions, 8192-token context, Apache-2.0, ~161M parameters, runs on CPU. See [ADR-0002](decisions/0002-embedding-model-jina-v2-base-code.md).
 
 **Known constraint:** the model needs `trust_remote_code=True`, and its custom code is incompatible with `transformers>=4.50`. The engine pins `transformers>=4.44,<4.50`.
+
+**Known constraint (parsing):** `tree-sitter` 0.26.0 returns corrupted node positions for files over ~6 KB. The engine pins `tree-sitter>=0.25.2,<0.26`; `test_large_file_has_correct_line_numbers` guards it.
 
 ## 6. Cross-cutting rules
 

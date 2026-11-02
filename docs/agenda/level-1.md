@@ -12,8 +12,8 @@
 | 1 | Repository foundation | ✅ Done |
 | 2 | Core data types, configuration, logging | ✅ Done |
 | 3 | Repository ingestion | ✅ Done |
-| 4 | Code extraction and chunking | ⬜ Next |
-| 5 | Embeddings | ⬜ |
+| 4 | Code extraction and chunking | ✅ Done |
+| 5 | Embeddings | ⬜ Next |
 | 6 | Vector store | ⬜ |
 | 7 | Indexing pipeline | ⬜ |
 | 8 | Similarity search and retrieval | ⬜ |
@@ -66,15 +66,17 @@
 
 ## Step 4: Code extraction and chunking (spec 5.2), core concept
 **Goal:** meaningful, traceable code units. Chunk quality caps retrieval quality.
-- **4.1** Fixed-window chunker with overlap (fallback + Level 3 baseline)
-- **4.2** tree-sitter setup for TS/TSX/JS; AST exploration session
-- **4.3** Extract functions, classes, methods, arrow/function expressions assigned to `const`, exports
-- **4.4** Window fallback for files without symbols
-- **4.5** Parse-failure fallback with recorded reason
+- **4.1** ✅ `window_ranges()`: fixed windows with overlap (fallback + Level 3 baseline)
+- **4.2** ✅ tree-sitter grammars for TS/TSX/JS; `scripts/ast_dump.py` for exploring trees
+- **4.3** ✅ Symbols: top-level functions (declarations, generators, single `const/let/var` bound to a function, `export`/`export default`), classes as **header + methods** (D1), doc comments directly above included (D3), qualified method names `Class.method` (D4)
+- **4.4** ✅ `chunk_file()`: symbol chunks + **gap windows** for every uncovered run of code (D2); blank edges trimmed; chunks without letters/digits dropped; one chunk per line range; lines split on `"\n"` only; CRLF normalized
+- **4.5** ✅ Syntax errors: valid symbols are kept, unreadable regions fall into gap windows, a warning is logged
 
 **Learn:** ASTs, concrete syntax trees, why function-shaped chunks help, what Level 1 doesn't handle.
-**Files:** `chunking/window.py`, `chunking/treesitter.py`, `chunking/extractors.py` + tests.
+**Files:** `chunking/window.py`, `chunking/symbols.py`, `chunking/chunker.py`, `scripts/ast_dump.py` + tests.
 **Done when:** correct 1-based line ranges for every fixture symbol; clean fallbacks; no empty chunks.
+**Found by the smoke test:** tree-sitter 0.26.0 corrupts node positions in files over ~6 KB (segfault on Windows). Pinned `<0.26`, with a regression test.
+**Limitations:** nested functions stay inside their parent; interfaces/types/enums, object-literal methods, CommonJS exports and multi-declarator statements are unnamed gap windows; very large functions are one chunk (the embedder truncates them in Step 5; sub-chunking is Level 3); bundled (non-`.min`) files are indexed.
 
 ## Step 5: Embeddings (spec 5.3), core concept
 **Goal:** code and queries become vectors in one shared space.

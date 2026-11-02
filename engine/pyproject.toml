@@ -18,7 +18,9 @@ dependencies = [
     # Pre-1.0: minor versions may break the vec0 API (ADR-0003).
     "sqlite-vec>=0.1.9,<0.2",
     "torch>=2.15.0",
-    "tree-sitter>=0.26.0",
+    # 0.26.0 corrupts node positions for files over ~6 KB (segfaults on Windows);
+  # see test_large_file_has_correct_line_numbers before raising this pin.
+  "tree-sitter>=0.25.2,<0.26",
     "tree-sitter-javascript>=0.25.0",
     "tree-sitter-typescript>=0.23.2",
 ]

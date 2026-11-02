@@ -21,3 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Language registry mapping `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs` and `.cjs` to language ids.
 - Repository discovery that prunes default exclusions, honours root and nested `.gitignore` files and user `exclude_globs`, does not follow symlinks, and enforces `max_files`.
 - Defensive file reading that skips oversized, binary, non-UTF-8 and unreadable files with a recorded reason.
+- Code chunking: tree-sitter symbol extraction for TypeScript, TSX and JavaScript (functions, class headers, methods with qualified names, attached doc comments), overlapping line windows for all other code, and tolerant handling of syntax errors.
+- `scripts/ast_dump.py` for inspecting tree-sitter syntax trees.
+
+### Fixed
+- Pinned `tree-sitter` below 0.26: 0.26.0 corrupts node positions in files over ~6 KB.
