@@ -70,8 +70,10 @@ query text
 
 | Module | Responsibility | Status |
 |---|---|---|
-| `models.py` | `CodeChunk`, `SearchResult` and other shared data types | 📋 Step 2 |
-| `config.py` | `IndexConfig`: extensions, exclusions, limits | 📋 Step 2 |
+| `models.py` | `CodeChunk`, `SymbolKind` (`SearchResult` arrives in Step 8) | ✅ Step 2.1 |
+| `ids.py` | `content_hash()`, `chunk_id()` | 📋 Step 2.2 |
+| `errors.py`, `log.py` | `CodeSenseError` hierarchy; stderr-only logging | 📋 Step 2.3 |
+| `config.py` | `IndexConfig`: extensions, exclusions, limits | 📋 Step 2.4 |
 | `ingest/` | File discovery, `.gitignore`, binary/size filters | 📋 Step 3 |
 | `chunking/` | tree-sitter extraction, fixed-window fallback | 📋 Step 4 |
 | `embedding/` | `Embedder` interface, `JinaEmbedder`, `FakeEmbedder` (tests) | 📋 Step 5 |

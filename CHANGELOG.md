@@ -14,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Python quality tooling: ruff, strict mypy, pytest.
 - GitHub Actions CI for the engine.
 - `.gitattributes` enforcing LF line endings.
+- `CodeChunk` and `SymbolKind` core data types with validated, 1-based line ranges and repository-relative POSIX paths.

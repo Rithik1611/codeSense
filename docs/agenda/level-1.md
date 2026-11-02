@@ -10,7 +10,7 @@
 |---|---|---|
 | 0 | Planning and environment | ✅ Done |
 | 1 | Repository foundation | ✅ Done |
-| 2 | Core data types, configuration, logging | ⬜ Next |
+| 2 | Core data types, configuration, logging | 🚧 In progress (2.1 ✅) |
 | 3 | Repository ingestion | ⬜ |
 | 4 | Code extraction and chunking | ⬜ |
 | 5 | Embeddings | ⬜ |
@@ -40,13 +40,13 @@
 
 ## Step 2: Core data types, configuration, logging
 **Goal:** define the system's shared types once.
-- **2.1** `CodeChunk` frozen dataclass with all spec 5.2 metadata
-- **2.2** Stable chunk IDs + SHA-256 content hashes (decision: should the ID depend on line numbers?)
-- **2.3** `IndexConfig`: extensions, exclusions, size/file/token limits, top-K, validated on load
-- **2.4** `CodeSenseError` hierarchy; logging to **stderr only**
+- **2.1** ✅ `CodeChunk` frozen dataclass + `SymbolKind`. Model id and indexing time are attached by the store in Step 6
+- **2.2** SHA-256 content hash (reuse embeddings) + chunk ID by **position** (decided: identity ≠ content)
+- **2.3** `CodeSenseError` hierarchy; logging to **stderr only** (`log.py`, not `logging.py`)
+- **2.4** `IndexConfig`: extensions, exclusions, size/file/token limits, top-K, validated on load
 
 **Learn:** dataclasses, immutability, content hashing, stable identity.
-**Files:** `models.py`, `config.py`, `errors.py`, `logging.py` + tests.
+**Files:** `models.py`, `ids.py`, `errors.py`, `log.py`, `config.py` + tests.
 **Done when:** tests cover ID stability, hash determinism, config validation; mypy strict passes.
 
 ## Step 3: Repository ingestion (spec 5.1)
