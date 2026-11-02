@@ -13,3 +13,7 @@ class CodeSenseError(Exception):
 
 class ConfigError(CodeSenseError):
     """Invalid user configuration (settings or environment variables)."""
+
+
+class IngestError(CodeSenseError):
+    """The repository as a whole cannot be indexed (a single bad file is skipped instead)."""

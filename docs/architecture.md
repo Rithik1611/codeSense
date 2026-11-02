@@ -46,10 +46,11 @@ flowchart TB
 
 ## 2. Data flow
 
-### Indexing 📋
+### Indexing (ingest ✅, the rest 📋)
 ```
 workspace files
-  → ingest/      discover supported files; apply .gitignore + exclusions; skip binary/oversized
+  → ingest/      discover(): prune exclusions + .gitignore, list supported files (names only)
+                 read_source(): per file; skip oversized/binary/non-UTF-8 with a recorded reason
   → chunking/    tree-sitter → functions, classes, methods (window fallback)
   → indexer      compare content hashes with the store; keep only new or changed chunks
   → embedding/   batch-embed new chunks → 768-dim L2-normalized vectors
@@ -74,7 +75,7 @@ query text
 | `ids.py` | `content_hash()`, `chunk_id()`, `repo_id()` (SHA-256; identity ≠ content) | ✅ Step 2.2 |
 | `errors.py`, `log.py` | `CodeSenseError` / `ConfigError`; stderr-only logging via `CODESENSE_LOG_LEVEL` | ✅ Step 2.3 |
 | `config.py` | `IndexConfig`: exclusions, size/file/token limits, window chunking; `from_dict` validates untrusted settings | ✅ Step 2.4 |
-| `ingest/` | File discovery, `.gitignore`, binary/size filters | 📋 Step 3 |
+| `ingest/` | `languages.py` (extension → language), `discovery.py` (walk, exclusions, `.gitignore`, file cap), `filters.py` (size, binary, UTF-8 checks per file); skips recorded as `SkippedFile` with a `SkipReason` | ✅ Step 3 |
 | `chunking/` | tree-sitter extraction, fixed-window fallback | 📋 Step 4 |
 | `embedding/` | `Embedder` interface, `JinaEmbedder`, `FakeEmbedder` (tests) | 📋 Step 5 |
 | `store/` | `VectorStore` interface, SQLite + sqlite-vec implementation | 📋 Step 6 |

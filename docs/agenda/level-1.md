@@ -11,8 +11,8 @@
 | 0 | Planning and environment | ✅ Done |
 | 1 | Repository foundation | ✅ Done |
 | 2 | Core data types, configuration, logging | ✅ Done |
-| 3 | Repository ingestion | ⬜ Next |
-| 4 | Code extraction and chunking | ⬜ |
+| 3 | Repository ingestion | ✅ Done |
+| 4 | Code extraction and chunking | ⬜ Next |
 | 5 | Embeddings | ⬜ |
 | 6 | Vector store | ⬜ |
 | 7 | Indexing pipeline | ⬜ |
@@ -51,15 +51,18 @@
 
 ## Step 3: Repository ingestion (spec 5.1)
 **Goal:** list exactly the source files worth indexing; never crash on a bad file.
-- **3.1** Discover `.ts .tsx .js .jsx .mjs .cjs`
-- **3.2** Default exclusions (`node_modules`, `.git`, `dist`, `build`, `out`, `coverage`, `*.min.js`, `*.d.ts`)
-- **3.3** `.gitignore` (root + nested) via `pathspec`, plus user patterns
-- **3.4** Skip binary, oversized and non-UTF-8 files and enforce the file cap. Record each skip with a reason
-- **3.5** Language registry by extension (the single source of supported extensions)
+- **3.1** ✅ Language registry: `.ts .tsx .js .jsx .mjs .cjs` → language id (the single source of supported extensions; `.tsx` is its own grammar)
+- **3.2** ✅ `discover()`: a directory walk that prunes default exclusions (`node_modules`, `.git`, `dist`, `build`, `out`, `coverage`) and excludes `*.min.js` and `*.d.ts`. Symlinks are not followed; a symlinked source file is recorded as `symlink`. Output is sorted
+- **3.3** ✅ Root and nested `.gitignore` files via `pathspec` (each relative to its own directory, the deepest decision wins), plus user `exclude_globs`. Defaults cannot be re-included
+- **3.4** ✅ `read_source()` skips `oversized` (reads at most limit + 1 bytes), `binary` (NUL in the first 8000 bytes), `not_utf8` and `unreadable` files and strips a UTF-8 BOM. `max_files` keeps the first N sorted paths and records the rest as `file_cap`
+
+**Two phases:** `discover()` lists names only (cheap). `read_source()` reads one file at a time, so memory stays flat. Only *supported* files that failed are recorded as skipped; ignored and unsupported files are out of scope.
+**Limitations:** symlinks are not followed; `.git/info/exclude` and the global gitignore are not read; UTF-16 files count as binary.
 
 **Learn:** gitignore semantics, binary detection, defensive I/O.
-**Files:** `ingest/discovery.py`, `ingest/filters.py`, tests, `tests/fixtures/`.
-**Done when:** fixture tests prove every skip rule, with reasons recorded.
+**Files:** `ingest/languages.py`, `ingest/discovery.py`, `ingest/filters.py`, tests.
+**Tests:** each test builds its fake repo in `tmp_path`. Committed fixture repos would be filtered by our own `.gitignore`, and would break in CI.
+**Done when:** tests prove every skip rule, with reasons recorded.
 
 ## Step 4: Code extraction and chunking (spec 5.2), core concept
 **Goal:** meaningful, traceable code units. Chunk quality caps retrieval quality.

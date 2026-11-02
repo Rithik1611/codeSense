@@ -18,3 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deterministic SHA-256 identifiers: `content_hash` (line-ending insensitive), position-based `chunk_id`, and case-normalized `repo_id`.
 - `CodeSenseError` / `ConfigError` for expected failures, and stderr-only logging configured by `CODESENSE_LOG_LEVEL`.
 - `IndexConfig` with validated indexing limits and `from_dict` parsing of untrusted settings (unknown keys and wrong types rejected).
+- Language registry mapping `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs` and `.cjs` to language ids.
+- Repository discovery that prunes default exclusions, honours root and nested `.gitignore` files and user `exclude_globs`, does not follow symlinks, and enforces `max_files`.
+- Defensive file reading that skips oversized, binary, non-UTF-8 and unreadable files with a recorded reason.

@@ -45,6 +45,38 @@ class CodeChunk:
         _check_relative_posix_path(self.path)
 
 
+class SkipReason(StrEnum):
+    """Why a supported source file was not indexed."""
+
+    SYMLINK = "symlink"  # not followed: could loop or point outside the repository
+    FILE_CAP = "file_cap"  # beyond IndexConfig.max_files
+    OVERSIZED = "oversized"  # larger than IndexConfig.max_file_bytes
+    BINARY = "binary"
+    NOT_UTF8 = "not_utf8"
+    UNREADABLE = "unreadable"  # permission denied, deleted after discovery, ...
+
+
+@dataclass(frozen=True, slots=True)
+class SourceFile:
+    """A supported file that passed every filter, ready for chunking."""
+
+    path: str
+    language: str
+    text: str
+
+
+@dataclass(frozen=True, slots=True)
+class SkippedFile:
+    """A supported source file that was not indexed, and why.
+
+    Ignored files (.gitignore, default exclusions) and unsupported languages are
+    out of scope, not skipped, so they are never recorded.
+    """
+
+    path: str
+    reason: SkipReason
+
+
 def _check_relative_posix_path(path: str) -> None:
     posix = PurePosixPath(path)
     if (
