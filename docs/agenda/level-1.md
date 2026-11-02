@@ -10,7 +10,7 @@
 |---|---|---|
 | 0 | Planning and environment | ✅ Done |
 | 1 | Repository foundation | ✅ Done |
-| 2 | Core data types, configuration, logging | 🚧 In progress (2.1 ✅) |
+| 2 | Core data types, configuration, logging | 🚧 In progress (2.1 ✅ 2.2 ✅) |
 | 3 | Repository ingestion | ⬜ |
 | 4 | Code extraction and chunking | ⬜ |
 | 5 | Embeddings | ⬜ |
@@ -41,7 +41,7 @@
 ## Step 2: Core data types, configuration, logging
 **Goal:** define the system's shared types once.
 - **2.1** ✅ `CodeChunk` frozen dataclass + `SymbolKind`. Model id and indexing time are attached by the store in Step 6
-- **2.2** SHA-256 content hash (reuse embeddings) + chunk ID by **position** (decided: identity ≠ content)
+- **2.2** ✅ SHA-256 content hash (reuse embeddings) + chunk ID by **position** (decided: identity ≠ content) + path-based `repo_id`
 - **2.3** `CodeSenseError` hierarchy; logging to **stderr only** (`log.py`, not `logging.py`)
 - **2.4** `IndexConfig`: extensions, exclusions, size/file/token limits, top-K, validated on load
 

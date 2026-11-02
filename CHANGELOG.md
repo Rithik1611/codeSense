@@ -15,3 +15,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for the engine.
 - `.gitattributes` enforcing LF line endings.
 - `CodeChunk` and `SymbolKind` core data types with validated, 1-based line ranges and repository-relative POSIX paths.
+- Deterministic SHA-256 identifiers: `content_hash` (line-ending insensitive), position-based `chunk_id`, and case-normalized `repo_id`.
