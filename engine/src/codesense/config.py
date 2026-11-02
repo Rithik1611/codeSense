@@ -22,7 +22,7 @@ class IndexConfig:
     exclude_globs: tuple[str, ...] = ()  # gitignore-style patterns, on top of .gitignore
     max_file_bytes: int = 1024 * 1024  # larger files are almost always generated or minified
     max_files: int = 20_000  # safety cap for accidentally opening a huge folder
-    max_chunk_tokens: int = 1024  # provisional: measured against CPU cost in Step 5
+    max_chunk_tokens: int = 512  # embedder input cap; covers 93% of chunks (docs/experiments)
     window_lines: int = 40  # fallback chunker window size
     window_overlap: int = 10  # lines shared by consecutive windows
 

@@ -15,5 +15,9 @@ class ConfigError(CodeSenseError):
     """Invalid user configuration (settings or environment variables)."""
 
 
+class EmbeddingError(CodeSenseError):
+    """The embedding model could not be loaded or failed to produce valid vectors."""
+
+
 class IngestError(CodeSenseError):
     """The repository as a whole cannot be indexed (a single bad file is skipped instead)."""

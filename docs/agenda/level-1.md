@@ -13,8 +13,8 @@
 | 2 | Core data types, configuration, logging | ✅ Done |
 | 3 | Repository ingestion | ✅ Done |
 | 4 | Code extraction and chunking | ✅ Done |
-| 5 | Embeddings | ⬜ Next |
-| 6 | Vector store | ⬜ |
+| 5 | Embeddings | ✅ Done |
+| 6 | Vector store | ⬜ Next |
 | 7 | Indexing pipeline | ⬜ |
 | 8 | Similarity search and retrieval | ⬜ |
 | 9 | Engine CLI (end-to-end milestone) | ⬜ |
@@ -80,16 +80,17 @@
 
 ## Step 5: Embeddings (spec 5.3), core concept
 **Goal:** code and queries become vectors in one shared space.
-- **5.1** Lab: tokens, pooling, normalization; a similarity matrix by hand
-- **5.2** `Embedder` interface (`embed_documents`, `embed_query`, `model_id`, `dimensions`)
-- **5.3** `JinaEmbedder`: load once, batch, normalize, validate dimensions, measured input-token cap
-- **5.4** Experiment: raw code vs code with a contextual header (path + symbol)
-- **5.5** `FakeEmbedder` so tests never download the model
-- **5.6** Clear `EmbeddingError`s
+- **5.1** ✅ `scripts/embedding_lab.py`: tokens, pooling, normalization, a query × code similarity matrix, cost vs length
+- **5.2** ✅ `Embedder` Protocol (`embed_documents`, `embed_query`, `model_id`, `dimensions`); float32, L2-normalized numpy vectors
+- **5.3** ✅ `JinaEmbedder`: loaded once, model **and** remote-code revisions pinned, `max_chunk_tokens` = 512 (measured), `batch_size` 8, output shape validated
+- **5.4** ✅ Experiment: the path/symbol header won (MRR 0.762 → 0.805, 15 queries) → `document_text()`. **Step 7 must key embedding reuse on the hash of `document_text`, not `content_hash`**
+- **5.5** ✅ `FakeEmbedder`: feature hashing (shared words → similar vectors), deterministic across processes
+- **5.6** ✅ `EmbeddingError` for load failures (offline, incompatible transformers), inference failures and wrong shapes
 
 **Learn:** what embeddings are, shared space, batching vs length cost, licensing.
-**Files:** `embedding/base.py`, `embedding/jina.py`, `embedding/fake.py`, `scripts/embedding_lab.py` + tests.
+**Files:** `embedding/base.py`, `embedding/jina.py`, `embedding/fake.py`, `scripts/embedding_lab.py`, `scripts/header_experiment.py`, `docs/experiments/level1-embeddings.md` + tests.
 **Done when:** shape, normalization and determinism tests pass; a `slow` real-model test passes; throughput recorded.
+**Measured:** ~4.5 chunks/s on an 8-core laptop CPU, so a first index of 1,000 chunks takes ~4 min. That makes Step 7's embedding reuse, progress reporting and cancellation essential. `pytest` skips `slow` tests by default; run them with `-m slow`.
 
 ## Step 6: Vector store (spec 5.4), core concept
 **Goal:** persist vectors + metadata and find nearest neighbours in one SQLite file.
@@ -98,7 +99,7 @@
 - **6.3** `VectorStore` + SQLite implementation: add/update, delete by file, k-nearest-neighbour search, clear, close
 - **6.4** One transaction per file
 - **6.5** Model/dimension compatibility check on open
-- **6.6** Look up existing vectors by content hash
+- **6.6** Look up existing vectors by the hash of the embedded text (`document_text`, see 5.4)
 
 **Learn:** virtual tables, cosine distance vs similarity, atomicity, index versioning.
 **Files:** `store/base.py`, `store/sqlite_store.py`, `store/schema.sql` + tests.

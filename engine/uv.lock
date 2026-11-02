@@ -114,6 +114,7 @@ name = "codesense"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "numpy" },
     { name = "pathspec" },
     { name = "sentence-transformers" },
     { name = "sqlite-vec" },
@@ -134,6 +135,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "numpy", specifier = ">=2" },
     { name = "pathspec", specifier = ">=1.1.1" },
     { name = "sentence-transformers", specifier = ">=3.4,<6" },
     { name = "sqlite-vec", specifier = ">=0.1.9,<0.2" },

@@ -23,6 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Defensive file reading that skips oversized, binary, non-UTF-8 and unreadable files with a recorded reason.
 - Code chunking: tree-sitter symbol extraction for TypeScript, TSX and JavaScript (functions, class headers, methods with qualified names, attached doc comments), overlapping line windows for all other code, and tolerant handling of syntax errors.
 - `scripts/ast_dump.py` for inspecting tree-sitter syntax trees.
+- Embeddings: `Embedder` protocol, `JinaEmbedder` (model and remote-code revisions pinned, 512-token input cap) and a deterministic `FakeEmbedder` for tests; chunks are embedded with a path/symbol header.
+- Embedding lab, raw-vs-header experiment and recorded CPU measurements (`docs/experiments/level1-embeddings.md`).
+
+### Changed
+- `max_chunk_tokens` default lowered from 1024 to 512, based on measured CPU cost.
+- `pytest` skips `slow` tests by default; run them with `-m slow`.
 
 ### Fixed
 - Pinned `tree-sitter` below 0.26: 0.26.0 corrupts node positions in files over ~6 KB.

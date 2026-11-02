@@ -53,7 +53,7 @@ workspace files
                  read_source(): per file; skip oversized/binary/non-UTF-8 with a recorded reason
   → chunking/    tree-sitter → functions, class headers, methods; uncovered code → line windows
   → indexer      compare content hashes with the store; keep only new or changed chunks
-  → embedding/   batch-embed new chunks → 768-dim L2-normalized vectors
+  → embedding/   document_text (path/symbol header + code) → 768-dim L2-normalized vectors
   → store/       write chunk metadata + vectors in one transaction per file
 ```
 
@@ -77,7 +77,7 @@ query text
 | `config.py` | `IndexConfig`: exclusions, size/file/token limits, window chunking; `from_dict` validates untrusted settings | ✅ Step 2.4 |
 | `ingest/` | `languages.py` (extension → language), `discovery.py` (walk, exclusions, `.gitignore`, file cap), `filters.py` (size, binary, UTF-8 checks per file); skips recorded as `SkippedFile` with a `SkipReason` | ✅ Step 3 |
 | `chunking/` | `symbols.py` (tree-sitter: functions, class header + methods, doc comments), `window.py` (overlapping line windows), `chunker.py` (symbols + gap windows → `CodeChunk`) | ✅ Step 4 |
-| `embedding/` | `Embedder` interface, `JinaEmbedder`, `FakeEmbedder` (tests) | 📋 Step 5 |
+| `embedding/` | `Embedder` Protocol + `document_text()` (path/symbol header + code), `JinaEmbedder` (pinned, 512-token cap), `FakeEmbedder` (feature hashing, for tests) | ✅ Step 5 |
 | `store/` | `VectorStore` interface, SQLite + sqlite-vec implementation | 📋 Step 6 |
 | `indexer.py` | Pipeline orchestration, embedding reuse, cancellation | 📋 Step 7 |
 | `retrieval.py` | Query → ranked results | 📋 Step 8 |
@@ -97,6 +97,10 @@ Only **two** interfaces exist on purpose: `Embedder` and `VectorStore`. The spec
 `jinaai/jina-embeddings-v2-base-code`: 768 dimensions, 8192-token context, Apache-2.0, ~161M parameters, runs on CPU. See [ADR-0002](decisions/0002-embedding-model-jina-v2-base-code.md).
 
 **Known constraint:** the model needs `trust_remote_code=True`, and its custom code is incompatible with `transformers>=4.50`. The engine pins `transformers>=4.44,<4.50`.
+
+**Pinned revisions:** `trust_remote_code` runs Python from the Hub, and this model loads it from a *second* repository. Both the model revision and the code revision are pinned in `embedding/jina.py`.
+
+**Measured cost** ([experiments](experiments/level1-embeddings.md)): ~4.5 chunks/s on an 8-core CPU; cost grows ~3× per doubling of length, so inputs are capped at 512 tokens (93% of real chunks fit whole).
 
 **Known constraint (parsing):** `tree-sitter` 0.26.0 returns corrupted node positions for files over ~6 KB. The engine pins `tree-sitter>=0.25.2,<0.26`; `test_large_file_has_correct_line_numbers` guards it.
 

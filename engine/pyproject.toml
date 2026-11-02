@@ -9,6 +9,7 @@ authors = [
 ]
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "numpy>=2",  # imported directly (vectors), so declared directly, not left transitive
     "pathspec>=1.1.1",
     # jina-embeddings-v2-base-code ships custom model code (trust_remote_code)
     # that imports helpers removed in transformers 4.50+/5.x. Pin until we
@@ -19,8 +20,8 @@ dependencies = [
     "sqlite-vec>=0.1.9,<0.2",
     "torch>=2.15.0",
     # 0.26.0 corrupts node positions for files over ~6 KB (segfaults on Windows);
-  # see test_large_file_has_correct_line_numbers before raising this pin.
-  "tree-sitter>=0.25.2,<0.26",
+    # see test_large_file_has_correct_line_numbers before raising this pin.
+    "tree-sitter>=0.25.2,<0.26",
     "tree-sitter-javascript>=0.25.0",
     "tree-sitter-typescript>=0.23.2",
 ]
@@ -69,7 +70,8 @@ files = ["src", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["-ra", "--strict-markers", "--strict-config"]
+# "not slow" by default: the real model takes ~40 s to load; `pytest -m slow` overrides it.
+addopts = ["-ra", "--strict-markers", "--strict-config", "-m", "not slow"]
 markers = [
     "slow: loads the real embedding model or other heavy resources (run with -m slow)",
 ]
