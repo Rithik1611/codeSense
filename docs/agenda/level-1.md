@@ -10,8 +10,8 @@
 |---|---|---|
 | 0 | Planning and environment | ✅ Done |
 | 1 | Repository foundation | ✅ Done |
-| 2 | Core data types, configuration, logging | 🚧 In progress (2.1 ✅ 2.2 ✅) |
-| 3 | Repository ingestion | ⬜ |
+| 2 | Core data types, configuration, logging | ✅ Done |
+| 3 | Repository ingestion | ⬜ Next |
 | 4 | Code extraction and chunking | ⬜ |
 | 5 | Embeddings | ⬜ |
 | 6 | Vector store | ⬜ |
@@ -42,8 +42,8 @@
 **Goal:** define the system's shared types once.
 - **2.1** ✅ `CodeChunk` frozen dataclass + `SymbolKind`. Model id and indexing time are attached by the store in Step 6
 - **2.2** ✅ SHA-256 content hash (reuse embeddings) + chunk ID by **position** (decided: identity ≠ content) + path-based `repo_id`
-- **2.3** `CodeSenseError` hierarchy; logging to **stderr only** (`log.py`, not `logging.py`)
-- **2.4** `IndexConfig`: extensions, exclusions, size/file/token limits, top-K, validated on load
+- **2.3** ✅ `CodeSenseError` hierarchy; logging to **stderr only** (`log.py`, not `logging.py`)
+- **2.4** ✅ `IndexConfig`: exclusions, size/file/token limits, window size/overlap; `from_dict` validates untrusted settings. Not settings: extensions (language registry, 3.5), `top_k` (per query, 8.2)
 
 **Learn:** dataclasses, immutability, content hashing, stable identity.
 **Files:** `models.py`, `ids.py`, `errors.py`, `log.py`, `config.py` + tests.
@@ -55,7 +55,7 @@
 - **3.2** Default exclusions (`node_modules`, `.git`, `dist`, `build`, `out`, `coverage`, `*.min.js`, `*.d.ts`)
 - **3.3** `.gitignore` (root + nested) via `pathspec`, plus user patterns
 - **3.4** Skip binary, oversized and non-UTF-8 files and enforce the file cap. Record each skip with a reason
-- **3.5** Language registry by extension
+- **3.5** Language registry by extension (the single source of supported extensions)
 
 **Learn:** gitignore semantics, binary detection, defensive I/O.
 **Files:** `ingest/discovery.py`, `ingest/filters.py`, tests, `tests/fixtures/`.
@@ -112,7 +112,7 @@
 ## Step 8: Similarity search and retrieval (spec 5.5), core concepts
 **Goal:** question in, ranked code out, honest scores.
 - **8.1** Lesson: cosine vs dot product vs L2; top-K; scores are not probabilities
-- **8.2** `Retriever`: validate → embed → k-nearest-neighbour search → resolve metadata → `SearchResult`
+- **8.2** `Retriever`: validate query and per-query `top_k` (1–100) → embed → k-nearest-neighbour search → resolve metadata → `SearchResult`
 - **8.3** Labelled sanity set (~10 queries) with the real model (`slow`)
 
 **Done when:** unit tests pass; slow retrieval test passes; hit rate recorded.

@@ -72,8 +72,8 @@ query text
 |---|---|---|
 | `models.py` | `CodeChunk`, `SymbolKind` (`SearchResult` arrives in Step 8) | ✅ Step 2.1 |
 | `ids.py` | `content_hash()`, `chunk_id()`, `repo_id()` (SHA-256; identity ≠ content) | ✅ Step 2.2 |
-| `errors.py`, `log.py` | `CodeSenseError` hierarchy; stderr-only logging | 📋 Step 2.3 |
-| `config.py` | `IndexConfig`: extensions, exclusions, limits | 📋 Step 2.4 |
+| `errors.py`, `log.py` | `CodeSenseError` / `ConfigError`; stderr-only logging via `CODESENSE_LOG_LEVEL` | ✅ Step 2.3 |
+| `config.py` | `IndexConfig`: exclusions, size/file/token limits, window chunking; `from_dict` validates untrusted settings | ✅ Step 2.4 |
 | `ingest/` | File discovery, `.gitignore`, binary/size filters | 📋 Step 3 |
 | `chunking/` | tree-sitter extraction, fixed-window fallback | 📋 Step 4 |
 | `embedding/` | `Embedder` interface, `JinaEmbedder`, `FakeEmbedder` (tests) | 📋 Step 5 |
