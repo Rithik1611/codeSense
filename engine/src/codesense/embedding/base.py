@@ -6,6 +6,7 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
+from codesense.ids import content_hash
 from codesense.models import CodeChunk
 
 type Vectors = NDArray[np.float32]
@@ -20,6 +21,11 @@ def document_text(chunk: CodeChunk) -> str:
     """
     symbol = f"// symbol: {chunk.symbol_name} ({chunk.symbol_kind})\n" if chunk.symbol_name else ""
     return f"// path: {chunk.path}\n{symbol}{chunk.content}"
+
+
+def embedding_key(chunk: CodeChunk) -> str:
+    """Reuse key for a chunk's vector: changes exactly when the embedded text changes."""
+    return content_hash(document_text(chunk))
 
 
 class Embedder(Protocol):

@@ -14,8 +14,8 @@
 | 3 | Repository ingestion | ✅ Done |
 | 4 | Code extraction and chunking | ✅ Done |
 | 5 | Embeddings | ✅ Done |
-| 6 | Vector store | ⬜ Next |
-| 7 | Indexing pipeline | ⬜ |
+| 6 | Vector store | ✅ Done |
+| 7 | Indexing pipeline | ⬜ Next |
 | 8 | Similarity search and retrieval | ⬜ |
 | 9 | Engine CLI (end-to-end milestone) | ⬜ |
 | 10 | Engine protocol server (JSON-RPC over stdio) | ⬜ |
@@ -94,15 +94,16 @@
 
 ## Step 6: Vector store (spec 5.4), core concept
 **Goal:** persist vectors + metadata and find nearest neighbours in one SQLite file.
-- **6.1** Lesson: vector DBs, exact vs approximate nearest-neighbour search, `vec0`
-- **6.2** Schema: `index_meta`, `files`, `chunks`, `vec0` (cosine)
-- **6.3** `VectorStore` + SQLite implementation: add/update, delete by file, k-nearest-neighbour search, clear, close
-- **6.4** One transaction per file
-- **6.5** Model/dimension compatibility check on open
-- **6.6** Look up existing vectors by the hash of the embedded text (`document_text`, see 5.4)
+- **6.1** ✅ Lesson + `scripts/knn_benchmark.py`: exact top-10 search takes 48 ms at 10k chunks and 378 ms at 100k on disk; writing is ~150× faster than embedding
+- **6.2** ✅ Schema: `index_meta`, `files` (hash + `indexed_at`), `chunks` (+ `embedding_key`, `model_id`), `vec0` (cosine) joined by rowid; WAL; generated in Python because `float[N]` depends on the embedder
+- **6.3** ✅ `VectorStore` Protocol + `SqliteVectorStore`: `replace_file` (add + update), `delete_file`, `file_hashes`, `search` → `(CodeChunk, similarity)`, `clear`, `close`. Vectors deleted explicitly (no cascade), no orphans
+- **6.4** ✅ One explicit transaction per file: a failed replace keeps the old version intact
+- **6.5** ✅ `schema_version`, `model_id`, `dimensions` and `repo_id` checked on open → `IndexMismatchError`; the caller rebuilds (the index is a cache, never migrated)
+- **6.6** ✅ `existing_vectors(keys)` by `embedding_key` = hash of `document_text` (see 5.4); survives line shifts
 
 **Learn:** virtual tables, cosine distance vs similarity, atomicity, index versioning.
-**Files:** `store/base.py`, `store/sqlite_store.py`, `store/schema.sql` + tests.
+**Files:** `store/base.py`, `store/sqlite_store.py`, `scripts/knn_benchmark.py`, `docs/experiments/level1-vector-store.md` + tests.
+**For Step 10:** a `sqlite3` connection belongs to one thread, so the indexing worker and the search handler each open their own store (WAL lets them run concurrently).
 **Done when:** round-trip, delete, reopen and model-mismatch tests pass, and the k-nearest-neighbour ordering is correct.
 
 ## Step 7: Indexing pipeline

@@ -1,4 +1,6 @@
-from codesense.embedding.base import document_text
+from dataclasses import replace
+
+from codesense.embedding.base import document_text, embedding_key
 from codesense.ids import chunk_id, content_hash
 from codesense.models import CodeChunk, SymbolKind
 
@@ -42,3 +44,19 @@ def test_same_code_at_another_path_is_different_embedding_input() -> None:
 
     assert here.content_hash == moved.content_hash
     assert document_text(here) != document_text(moved)
+
+
+def test_embedding_key_survives_a_line_shift_but_not_a_move_or_an_edit() -> None:
+    # The payoff of "two hashes, two jobs": an edit above a function shifts its lines
+    # (new chunk_id) but not its text, so its stored vector can be reused.
+    original = make_chunk("getUser", SymbolKind.FUNCTION)
+    shifted = replace(
+        original, start_line=13, end_line=15, chunk_id=chunk_id("r", "src/users.ts", 13, 15)
+    )
+    moved = replace(original, path="src/legacy/users.ts")
+    edited = replace(original, content=original.content.replace("db.get", "cache.get"))
+
+    assert shifted.chunk_id != original.chunk_id
+    assert embedding_key(shifted) == embedding_key(original)
+    assert embedding_key(moved) != embedding_key(original)
+    assert embedding_key(edited) != embedding_key(original)

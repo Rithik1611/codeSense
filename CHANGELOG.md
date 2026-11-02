@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/ast_dump.py` for inspecting tree-sitter syntax trees.
 - Embeddings: `Embedder` protocol, `JinaEmbedder` (model and remote-code revisions pinned, 512-token input cap) and a deterministic `FakeEmbedder` for tests; chunks are embedded with a path/symbol header.
 - Embedding lab, raw-vs-header experiment and recorded CPU measurements (`docs/experiments/level1-embeddings.md`).
+- Vector store: `VectorStore` protocol and `SqliteVectorStore` (SQLite + sqlite-vec) with atomic per-file updates, exact cosine search returning similarity, embedding reuse by `embedding_key`, and refusal of indexes built with another schema, model or repository.
+- On-disk nearest-neighbour benchmark (`scripts/knn_benchmark.py`, `docs/experiments/level1-vector-store.md`).
 
 ### Changed
 - `max_chunk_tokens` default lowered from 1024 to 512, based on measured CPU cost.

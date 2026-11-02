@@ -78,7 +78,7 @@ query text
 | `ingest/` | `languages.py` (extension → language), `discovery.py` (walk, exclusions, `.gitignore`, file cap), `filters.py` (size, binary, UTF-8 checks per file); skips recorded as `SkippedFile` with a `SkipReason` | ✅ Step 3 |
 | `chunking/` | `symbols.py` (tree-sitter: functions, class header + methods, doc comments), `window.py` (overlapping line windows), `chunker.py` (symbols + gap windows → `CodeChunk`) | ✅ Step 4 |
 | `embedding/` | `Embedder` Protocol + `document_text()` (path/symbol header + code), `JinaEmbedder` (pinned, 512-token cap), `FakeEmbedder` (feature hashing, for tests) | ✅ Step 5 |
-| `store/` | `VectorStore` interface, SQLite + sqlite-vec implementation | 📋 Step 6 |
+| `store/` | `VectorStore` Protocol; `SqliteVectorStore`: per-file atomic `replace_file`/`delete_file`, exact cosine top-k `search` returning similarity, `existing_vectors` for reuse, identity check on open | ✅ Step 6 |
 | `indexer.py` | Pipeline orchestration, embedding reuse, cancellation | 📋 Step 7 |
 | `retrieval.py` | Query → ranked results | 📋 Step 8 |
 | `cli.py` | `codesense index` / `codesense search` | 📋 Step 9 |
@@ -90,7 +90,10 @@ Only **two** interfaces exist on purpose: `Embedder` and `VectorStore`. The spec
 
 - **Location:** VS Code's per-workspace `storageUri`, **never inside the user's repository**.
 - **Format:** one SQLite file (`index.db`) holding metadata tables and a `vec0` virtual table for vectors. See [ADR-0003](decisions/0003-sqlite-vec-vector-store.md).
-- **Versioning:** the index records its schema version, embedding model id and vector dimensions. An index built with a different model is refused rather than mixed.
+- **Versioning:** the index records its schema version, embedding model id, vector dimensions and repository id. An index built differently is refused (`IndexMismatchError`) rather than mixed; it is derived data, so it is rebuilt, never migrated.
+- **Tables:** `index_meta` (identity), `files` (content hash, `indexed_at`), `chunks` (location, code, `embedding_key`, `model_id`), and `chunk_vectors` (`vec0`, cosine) sharing each chunk's rowid.
+- **Atomicity:** one transaction per file, so a file in the index is always entirely the old or the new version. WAL mode lets searches run while indexing writes.
+- **Measured** ([experiments](experiments/level1-vector-store.md)): exact top-10 search in 48 ms at 10k chunks; ~3.9 KB per chunk on disk.
 
 ## 5. Embedding model
 

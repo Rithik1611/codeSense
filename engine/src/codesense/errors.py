@@ -19,5 +19,13 @@ class EmbeddingError(CodeSenseError):
     """The embedding model could not be loaded or failed to produce valid vectors."""
 
 
+class StoreError(CodeSenseError):
+    """The index file cannot be opened, read or written."""
+
+
+class IndexMismatchError(StoreError):
+    """The index was built with a different schema, model or repository; rebuild it."""
+
+
 class IngestError(CodeSenseError):
     """The repository as a whole cannot be indexed (a single bad file is skipped instead)."""

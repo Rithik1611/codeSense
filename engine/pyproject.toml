@@ -68,6 +68,10 @@ select = [
 strict = true
 files = ["src", "tests"]
 
+[[tool.mypy.overrides]]
+module = ["sqlite_vec"]  # ships no type hints; we only call sqlite_vec.load()
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 # "not slow" by default: the real model takes ~40 s to load; `pytest -m slow` overrides it.

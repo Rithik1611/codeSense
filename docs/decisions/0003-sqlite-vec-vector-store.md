@@ -36,7 +36,7 @@ Use **SQLite** (Python's built-in `sqlite3`) with the **[sqlite-vec](https://git
 
 **Negative**
 - sqlite-vec is pre-1.0 (v0.1.x). Its API may change, so we pin it and wrap it.
-- Brute-force search is O(N) per query. Fine for ~100k chunks, too slow for millions.
+- Brute-force search is O(N) per query. Fine for ~100k chunks, too slow for millions. **Measured in Step 6** ([experiments](../experiments/level1-vector-store.md)): top-10 search takes 48 ms at 10k chunks, 157 ms at 50k and 378 ms at 100k, on disk.
 - Requires a Python build with SQLite extension loading enabled. The uv-managed CPython supports this, and it was verified in the smoke test.
 
 **Revisit when:** a single index exceeds ~100k chunks and search latency becomes noticeable (approximate search is a Level 5 ablation), or sqlite-vec makes breaking changes.
